@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bean There Daily! — Indis Viva City</title>
+  <style>
+    :root {
+      --bg: #12100e;
+      --card-bg: #1c1815;
+      --accent: #e5a93b;
+      --accent-hover: #f5ba4c;
+      --text: #f5efe6;
+      --text-muted: #a89f91;
+      --border: #332b25;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; max-width: 600px; margin: 0 auto; line-height: 1.4; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid var(--border); margin-bottom: 15px; }
+    h1 { font-size: 1.5rem; color: var(--accent); letter-spacing: 0.5px; }
+    .header-btns { display: flex; gap: 8px; }
+    
+    button { background-color: var(--accent); color: #000; border: none; padding: 8px 12px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+    button:hover { background-color: var(--accent-hover); }
+    button.secondary { background-color: transparent; color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { background-color: var(--border); }
+
+    .accordion { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+    .accordion-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; background: #231e1a; }
+    .accordion-header:hover { background: #2a241f; }
+    .accordion-content { padding: 15px; display: none; }
+    .accordion.active .accordion-content { display: block; }
+    .accordion-icon { transition: transform 0.2s; }
+    .accordion.active .accordion-icon { transform: rotate(180deg); }
+
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .menu-item { background: var(--bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .menu-item .title { font-weight: bold; color: var(--text); font-size: 0.95rem; }
+    .menu-item .price { color: var(--accent); font-weight: bold; font-size: 0.9rem; }
+
+    /* Dice section */
+    .dice-box { text-align: center; padding: 10px; }
+    .dice { font-size: 3rem; cursor: pointer; display: inline-block; user-select: none; transition: transform 0.3s; }
+    .pun-display { margin-top: 10px; font-style: italic; color: var(--accent); min-height: 2.4em; font-size: 0.95rem; }
+
+    /* Feedback Form */
+    .form-group { margin-bottom: 10px; }
+    label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 0.9rem; }
+    .star-rating { display: flex; gap: 5px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+    .star-rating .star.active { color: var(--accent); }
+
+    /* Admin Dashboard */
+    .admin-only { display: none; }
+    .admin-only.unlocked { display: block; }
+    .stat-card { background: var(--bg); padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border); }
+    .stat-val { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+    
+    .table-container { overflow-x: auto; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-muted); }
+
+    /* Modal */
+    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
+    .modal.active { display: flex; }
+    .modal-card { background: var(--card-bg); padding: 20px; border-radius: 8px; width: 90%; max-width: 350px; border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bean There Daily!</h1>
+    <div class="header-btns">
+      <button class="secondary" id="audioToggleBtn" onclick="toggleMokaAudio()">☕ Sound: OFF</button>
+      <button id="adminAuthBtn" onclick="openAdminModal()">🔑 Admin</button>
+    </div>
+  </header>
+
+  <!-- Section 1: Menu & Specials -->
+  <div class="accordion active">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>📜 Menu & Specials</span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+      <div class="menu-grid">
+        <div class="menu-item"><div class="title">Iced Americano</div><div class="price">₹99</div></div>
+        <div class="menu-item"><div class="title">Ginger Ale Black</div><div class="price">₹139</div></div>
+        <div class="menu-item"><div class="title">Cranberry Espresso</div><div class="price">₹149</div></div>
+        <div class="menu-item"><div class="title">Orange Espresso</div><div class="price">₹199</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: 3D Coffee Pun Dice -->
+  <div class="accordion">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>🎲 Roll for a Coffee Pun</span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+      <div class="dice-box">
+        <div class="dice" id="diceElement" onclick="rollDice()">🎲</div>
+        <div class="pun-display" id="punDisplay">Tap the dice to roll a pun!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Customer Feedback Panel -->
+  <div class="accordion" id="feedback-panel">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>⭐ Leave Feedback</span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+      <form id="feedbackForm" onsubmit="submitFeedback(event)">
+        <div class="form-group">
+          <label>Your Name (Optional)</label>
+          <input type="text" id="custName" placeholder="e.g. Coffee Lover">
+        </div>
+        <div class="form-group">
+          <label>Drinks Ordered</label>
+          <select id="custDrink">
+            <option value="Iced Americano">Iced Americano</option>
+            <option value="Ginger Ale Black">Ginger Ale Black</option>
+            <option value="Cranberry Espresso">Cranberry Espresso</option>
+            <option value="Orange Espresso">Orange Espresso</option>
+            <option value="Multiple Items">Multiple Items / Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Rating</label>
+          <div class="star-rating" id="starRating">
+            <span class="star" onclick="setRating(1)">★</span>
+            <span class="star" onclick="setRating(2)">★</span>
+            <span class="star" onclick="setRating(3)">★</span>
+            <span class="star" onclick="setRating(4)">★</span>
+            <span class="star" onclick="setRating(5)">★</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Comments / Notes</label>
+          <textarea id="custComment" rows="2" placeholder="How was your brew?"></textarea>
+        </div>
+        <button type="submit" style="width: 100%;">Submit Review</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section 4: Admin Portal (Hidden by Default) -->
+  <div class="admin-only" id="adminSection">
+    <div class="accordion active">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>📊 Admin P&L & Reviews</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-content">
+        
+        <h3>Shift Sales Tracker</h3>
+        <div class="menu-grid" style="margin-top: 10px;">
+          <div><label>Americano (₹99)</label><input type="number" id="s_amer" value="0" min="0" onchange="calculateFinancials()"></div>
+          <div><label>Ginger Ale (₹139)</label><input type="number" id="s_ging" value="0" min="0" onchange="calculateFinancials()"></div>
+          <div><label>Cranberry (₹149)</label><input type="number" id="s_cran" value="0" min="0" onchange="calculateFinancials()"></div>
+          <div><label>Orange (₹199)</label><input type="number" id="s_oran" value="0" min="0" onchange="calculateFinancials()"></div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <label>Offline Discount Total (₹)</label>
+          <input type="number" id="s_disc" value="0" min="0" onchange="calculateFinancials()">
+        </div>
+
+        <h3 style="margin-top: 15px;">Expense Logger</h3>
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+          <input type="text" id="expName" placeholder="Item (e.g. Ice)">
+          <input type="number" id="expAmt" placeholder="₹" style="width: 80px;">
+          <button type="button" onclick="addExpense()">Add</button>
+        </div>
+        <ul id="expenseList" style="margin-top: 8px; font-size: 0.85rem; list-style: none;"></ul>
+
+        <hr style="border-color: var(--border); margin: 15px 0;">
+
+        <div class="stat-card">
+          <div>Gross Sales: <span id="lblGross">₹0</span></div>
+          <div>Total Expenses: <span id="lblExp">₹0</span></div>
+          <div style="margin-top: 5px;"><strong>Net Profit: <span class="stat-val" id="lblNet">₹0</span> (<span id="lblMargin">0%</span>)</strong></div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+          <button class="secondary" onclick="exportCSV()">Export Reviews CSV</button>
+          <button class="secondary" onclick="openChangePassModal()">Change Password</button>
+        </div>
+
+        <h3 style="margin-top: 15px;">Customer Reviews</h3>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Name</th><th>Drink</th><th>★</th><th>Notes</th></tr></thead>
+            <tbody id="reviewsTbody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div class="modal" id="passModal">
+    <div class="modal-card">
+      <h3 id="modalTitle">Admin Login</h3>
+      <div class="form-group" style="margin-top: 10px;">
+        <input type="password" id="adminPassInput" placeholder="Enter Password">
+      </div>
+      <div style="display:flex; justify-content: flex-end; gap: 8px;">
+        <button class="secondary" onclick="closeModal()">Cancel</button>
+        <button onclick="handleAdminAuth()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentRating = 5;
+    let audioCtx = null;
+    let mokaOsc = null;
+    let expenses = [];
+    
+    const defaultPuns = {
+      1: "Better LATTE than never! ☕",
+      2: "Words cannot ESPRESSO how much coffee means to us! ❤️",
+      3: "DECAF? No thanks, that's a depresso! 🚫",
+      4: "We are BREW-tally honest about good coffee! 🧊",
+      5: "Everything I do, I do it for the EXTRA SHOT! ⚡",
+      6: "Have a GROUND-breaking day at Indis Viva City! 🌟"
+    };
+
+    window.onload = function() {
+      if (window.location.hash === "#feedback-panel") {
+        const fbPanel = document.getElementById("feedback-panel");
+        if (fbPanel) fbPanel.classList.add("active");
+      }
+      setRating(5);
+      renderReviews();
+    };
+
+    function playClickSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch(e){}
+    }
+
+    function toggleAccordion(header) {
+      playClickSound();
+      const parent = header.parentElement;
+      parent.classList.toggle("active");
+    }
+
+    function rollDice() {
+      playClickSound();
+      const diceEl = document.getElementById("diceElement");
+      const punEl = document.getElementById("punDisplay");
+      
+      diceEl.style.transform = "rotate(360deg) scale(1.2)";
+      setTimeout(() => {
+        const val = Math.floor(Math.random() * 6) + 1;
+        const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        diceEl.innerText = diceFaces[val - 1];
+        diceEl.style.transform = "none";
+        punEl.innerText = defaultPuns[val];
+      }, 300);
+    }
+
+    function setRating(val) {
+      playClickSound();
+      currentRating = val;
+      const stars = document.querySelectorAll("#starRating .star");
+      stars.forEach((star, idx) => {
+        if (idx < val) star.classList.add("active");
+        else star.classList.remove("active");
+      });
+    }
+
+    function submitFeedback(e) {
+      e.preventDefault();
+      playClickSound();
+      
+      const name = document.getElementById("custName").value || "Anonymous";
+      const drink = document.getElementById("custDrink").value;
+      const comment = document.getElementById("custComment").value;
+
+      const review = { name, drink, rating: currentRating, comment, time: new Date().toLocaleTimeString() };
+      
+      let reviews = JSON.parse(localStorage.getItem("btd_reviews") || "[]");
+      reviews.push(review);
+      localStorage.setItem("btd_reviews", JSON.stringify(reviews));
+
+      alert("Thank you for your feedback! ☕");
+      document.getElementById("feedbackForm").reset();
+      setRating(5);
+      renderReviews();
+    }
+
+    function toggleMokaAudio() {
+      const btn = document.getElementById("audioToggleBtn");
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      if (mokaOsc) {
+        mokaOsc.stop();
+        mokaOsc = null;
+        btn.innerText = "☕ Sound: OFF";
+      } else {
+        mokaOsc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        mokaOsc.type = 'triangle';
+        mokaOsc.frequency.setValueAtTime(80, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+        mokaOsc.connect(gain);
+        gain.connect(audioCtx.destination);
+        mokaOsc.start();
+        btn.innerText = "☕ Sound: ON";
+      }
+    }
+
+    let authMode = "login";
+
+    function openAdminModal() {
+      playClickSound();
+      authMode = "login";
+      document.getElementById("modalTitle").innerText = "Admin Login";
+      document.getElementById("adminPassInput").value = "";
+      document.getElementById("passModal").classList.add("active");
+    }
+
+    function openChangePassModal() {
+      playClickSound();
+      authMode = "change";
+      document.getElementById("modalTitle").innerText = "Change Password";
+      document.getElementById("adminPassInput").value = "";
+      document.getElementById("passModal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("passModal").classList.remove("active");
+    }
+
+    function handleAdminAuth() {
+      const input = document.getElementById("adminPassInput").value;
+      const currentPass = localStorage.getItem("btd_admin_pass") || "coffee123";
+
+      if (authMode === "login") {
+        if (input === currentPass) {
+          document.getElementById("adminSection").classList.add("unlocked");
+          closeModal();
+          calculateFinancials();
+        } else {
+          alert("Incorrect password!");
+        }
+      } else if (authMode === "change") {
+        if (input.length < 4) {
+          alert("Password must be at least 4 characters!");
+          return;
+        }
+        localStorage.setItem("btd_admin_pass", input);
+        alert("Password updated successfully!");
+        closeModal();
+      }
+    }
+
+    function addExpense() {
+      const name = document.getElementById("expName").value;
+      const amt = parseFloat(document.getElementById("expAmt").value);
+      if (name && !isNaN(amt)) {
+        expenses.push({ name, amt });
+        document.getElementById("expName").value = "";
+        document.getElementById("expAmt").value = "";
+        renderExpenses();
+        calculateFinancials();
+      }
+    }
+
+    function renderExpenses() {
+      const list = document.getElementById("expenseList");
+      list.innerHTML = expenses.map((e, i) => `<li>• ${e.name}: ₹${e.amt}</li>`).join("");
+    }
+
+    function calculateFinancials() {
+      const s1 = (parseInt(document.getElementById("s_amer").value) || 0) * 99;
+      const s2 = (parseInt(document.getElementById("s_ging").value) || 0) * 139;
+      const s3 = (parseInt(document.getElementById("s_cran").value) || 0) * 149;
+      const s4 = (parseInt(document.getElementById("s_oran").value) || 0) * 199;
+      const disc = parseFloat(document.getElementById("s_disc").value) || 0;
+
+      const gross = (s1 + s2 + s3 + s4) - disc;
+      const totalExp = expenses.reduce((sum, e) => sum + e.amt, 0);
+      const net = gross - totalExp;
+      const margin = gross > 0 ? ((net / gross) * 100).toFixed(1) : 0;
+
+      document.getElementById("lblGross").innerText = `₹${gross}`;
+      document.getElementById("lblExp").innerText = `₹${totalExp}`;
+      document.getElementById("lblNet").innerText = `₹${net}`;
+      document.getElementById("lblMargin").innerText = `${margin}%`;
+    }
+
+    function renderReviews() {
+      const reviews = JSON.parse(localStorage.getItem("btd_reviews") || "[]");
+      const tbody = document.getElementById("reviewsTbody");
+      tbody.innerHTML = reviews.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.drink}</td>
+          <td>${r.rating}★</td>
+          <td>${r.comment || '-'}</td>
+        </tr>
+      `).join("");
+    }
+
+    function exportCSV() {
+      const reviews = JSON.parse(localStorage.getItem("btd_reviews") || "[]");
+      if (!reviews.length) return alert("No reviews to export.");
+      let csv = "Name,Drink,Rating,Comment,Time\n";
+      reviews.forEach(r => {
+        csv += `"${r.name}","${r.drink}",${r.rating},"${r.comment || ''}","${r.time}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'bean_there_daily_reviews.csv';
+      a.click();
+    }
+  </script>
+</body>
+</html>
